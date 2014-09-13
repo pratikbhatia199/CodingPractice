@@ -1,0 +1,60 @@
+__author__ = 'pratik'
+
+class Node:
+
+    left = None
+    right = None
+    data  = None
+    def __init__(self, data):
+        self.data = data
+
+class BinarySearchTree:
+
+    root = None
+
+    def insert(self, node):
+        if not self.root:
+            self.root = node
+            return
+        current_node = self.root
+        parent_node = None
+
+        while(current_node!=None):
+            if node.data < current_node.data:
+                parent_node = current_node
+                current_node = current_node.left
+            else:
+                parent_node = current_node
+                current_node = current_node.right
+
+        if node.data < parent_node.data:
+            parent_node.left = node
+        else:
+            parent_node.right = node
+
+
+
+    def inorder_traversal(self, node):
+        if not node:
+            return
+        self.inorder_traversal(node.left)
+        self.inorder_traversal(node.right)
+
+    def get_max_height(self, root):
+        if root.left==None and root.right == None:
+            return 1
+        if self.get_max_height(root.left) > self.get_max_height(root.right):
+            return self.get_max_height(root.left)+1
+        else:
+            return self.get_max_height(root.right)+1
+
+
+class BinarySearchMain:
+    inserts = [5,3,7,2,1,8,9]
+    bst = BinarySearchTree()
+    for value in inserts:
+        node = Node(value)
+        bst.insert(node)
+        bst.inorder_traversal(bst.root)
+    bst.inorder_traversal(bst.root)
+
