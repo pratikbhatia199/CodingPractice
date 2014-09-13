@@ -15,6 +15,16 @@ class GraphBFS:
                   'x':['w', 't', 'y'],
                   'y':['x', 'u']
                   }
+    """
+    dict_graph = {'u':['v','x'],
+              'v':['y'],
+              'w':['z','y'],
+              'x':['v'],
+              'y':['x'],
+              'z':['z']
+              }
+    """
+
 
     def bfs(self, node):
             print node
@@ -31,6 +41,7 @@ class GraphBFS:
 
 def main():
     g_bfs = GraphBFS()
-    g_bfs.bfs('s')
+    g_bfs.bfs('u')
+
 
 main()

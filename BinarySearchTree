@@ -38,6 +38,7 @@ class BinarySearchTree:
         if not node:
             return
         self.inorder_traversal(node.left)
+        print node.data
         self.inorder_traversal(node.right)
 
     def get_max_height(self, root):
@@ -49,12 +50,16 @@ class BinarySearchTree:
             return self.get_max_height(root.right)+1
 
 
-class BinarySearchMain:
+def main():
     inserts = [5,3,7,2,1,8,9]
     bst = BinarySearchTree()
     for value in inserts:
         node = Node(value)
         bst.insert(node)
-        bst.inorder_traversal(bst.root)
     bst.inorder_traversal(bst.root)
+
+
+main()
+
+
 
