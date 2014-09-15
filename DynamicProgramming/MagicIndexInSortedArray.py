@@ -18,7 +18,7 @@ def binary_search_modified(start, end, array, found):
     if array[mid]>mid:
         found =binary_search_modified(start,mid-1, array, found)
 
-    if array[mid]<mid:.
+    if array[mid]<mid:
         found=binary_search_modified(start+1, end, array, found)
     return found
 
