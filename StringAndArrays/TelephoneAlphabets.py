@@ -31,15 +31,24 @@ for i in range(0,len(number)):
 print len(possible_strings)
 
 
-def compute_strings(index_number, list_output):
+# def compute_strings(index_number, list_output):
+#     if index_number == len(number):
+#         print list_output
+#         return
+#
+#     for alphabet in dict_no_alphabet[number[index_number]]:
+#         temp_copy = copy(list_output)
+#         temp_copy.append(alphabet)
+#         compute_strings(index_number+1, temp_copy)
+
+def compute_strings_str(index_number, str_output):
     if index_number == len(number):
-        print list_output
+        print str_output
         return
 
     for alphabet in dict_no_alphabet[number[index_number]]:
-        temp_copy = copy(list_output)
-        temp_copy.append(alphabet)
-        compute_strings(index_number+1, temp_copy)
+        temp_str = str_output+alphabet
+        compute_strings_str(index_number+1, temp_str)
 
-
-compute_strings(0,[])
+# compute_strings(0,"")
+compute_strings_str(0, "")
