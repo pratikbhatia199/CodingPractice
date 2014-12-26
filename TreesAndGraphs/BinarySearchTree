@@ -48,15 +48,93 @@ class BinarySearchTree:
             return self.get_max_height(root.left)+1
         else:
             return self.get_max_height(root.right)+1
+    def populate_left_tree_on_stack(self, root, list_stack):
+        while(root!=None):
+            list_stack.append(root)
+            root = root.left
+        return
 
+    def inorder_non_recursive(self, root):
+        print "starting non recursive call"
+        list_stack = []
+        # self.populate_left_tree_on_stack(root, list_stack)
+        # while(list_stack):
+        #     current = list_stack.pop()
+        #     print current.data
+        #     if current.right:
+        #         self.populate_left_tree_on_stack(current.right, list_stack)
+        while(list_stack or root):
+            while(root):
+                list_stack.append(root)
+                root = root.left
+
+            root = list_stack.pop()
+            print root.data
+            root = root.right
+
+
+
+    def preorder(self, root):
+        if root:
+            print root.data
+            self.preorder(root.left)
+            self.preorder(root.right)
+
+    def print_node_and_populate_stack_with_left_tree(self, root, list_stack):
+        while(root):
+            print root.data
+            list_stack.append(root)
+            root = root.left
+
+    def preorder_non_recursive(self, root):
+        print "Starting preorder non recursive"
+        list_stack = []
+
+        while(list_stack or root):
+            while(root):
+                print root.data
+                if root.right:
+                    list_stack.append(root.right)
+                root = root.left
+            if list_stack:
+                root = list_stack.pop()
+
+    def postorder_non_recursive(self, root):
+        print "postorder non recursive"
+        list_stack = []
+        last_visited = None
+        while(list_stack or root):
+            while(root):
+                list_stack.append(root)
+                root = root.left
+
+            peek_root = list_stack[len(list_stack)-1]
+            if peek_root.right and last_visited!=peek_root.right:
+                root = peek_root.right
+            else:
+                print peek_root.data
+                last_visited = list_stack.pop()
+
+    def postorder(self, root):
+        if root:
+            self.postorder(root.left)
+            self.postorder(root.right)
+            print root.data
 
 def main():
-    inserts = [5,3,7,2,1,8,9]
+    inserts = [5,2,8,3,1,7,9]
     bst = BinarySearchTree()
     for value in inserts:
         node = Node(value)
         bst.insert(node)
     bst.inorder_traversal(bst.root)
+    bst.inorder_non_recursive(bst.root)
+    bst.preorder_non_recursive(bst.root)
+    print "preorder recursive"
+    bst.preorder(bst.root)
+    print "postorder recursive"
+    bst.postorder(bst.root)
+    bst.postorder_non_recursive(bst.root)
 
 
 main()
