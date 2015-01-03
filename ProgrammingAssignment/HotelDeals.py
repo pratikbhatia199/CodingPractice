@@ -5,7 +5,7 @@ from collections import defaultdict
 import dateutil.parser as dparser
 from datetime import datetime as datecheck
 from CustomExceptions import DealValue, DealType, BlankValues, InvalidSequence, InvalidCommandLine, NegativeStay
-import Globals
+import Constants
 
 
 class HotelDeals:
@@ -87,12 +87,14 @@ def check_reservation_parameters(hotel_name, checkin_date, num_stay_days):
     except ValueError as err:
         print "Check-in date invalid."
         print err
+        sys.exit(0)
 
     if not hotel_name.strip():
         raise BlankValues(0, "Hotel Name")
 
-    if num_stay_days < 1:
+    if int(num_stay_days) < 1:
         raise NegativeStay(num_stay_days)
+
 
 def process_command_line_args(args):
     """
@@ -142,11 +144,13 @@ def check_values_of_files(row_number, hotel_name, nightly_rate, promo_txt, deal_
 
     check_blank_values(row_number, hotel_name, nightly_rate, promo_txt, deal_value, deal_type, start_date, end_date)
 
+    #The deal value can never be positive or zero
     if int(deal_value) >= 0:
         raise DealValue(row_number, deal_value)
-
-    if deal_type not in Globals.set_possible_deal_types:
+    #Deal type can be only the ones specified
+    if deal_type not in Constants.set_possible_deal_types:
         raise DealType(row_number, deal_type)
+    #Date format is YYYY-MM-DD
     try:
         datecheck.strptime(start_date, "%Y-%m-%d")
     except ValueError as err:
@@ -159,6 +163,7 @@ def check_values_of_files(row_number, hotel_name, nightly_rate, promo_txt, deal_
         print "End date invalid, row number: ", row_number
         print err
 
+    #Start date cannot be after than the end date value
     if dparser.parse(start_date) > dparser.parse(end_date):
         raise InvalidSequence(row_number, start_date, end_date)
 
@@ -198,6 +203,7 @@ def populate_list_promo_text(list_hotel_deals, list_promo_text, reservation):
     for number, hotel_deal in enumerate(list_hotel_deals):
         if reservation.get_checkin_date() >= hotel_deal.get_start_date():
             if hotel_deal.get_deal_type() == 'rebate_3plus':
+                #This rebate is only applicable if stay is for more than three days
                 if reservation.get_num_stay_days() >= 3:
                     list_promo_text.append(hotel_deal.get_promo_txt())
             else:
