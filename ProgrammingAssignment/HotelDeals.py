@@ -195,7 +195,7 @@ def populate_hotel_deals_from_file(file_name, dict_hotel_deals):
                     hotel_deal = HotelDeals(hotel_name, nightly_rate, promo_txt, deal_value, deal_type, start_date, end_date)
                     dict_hotel_deals[hotel_name].append(hotel_deal)
             except ValueError as err:
-                print "Row number", row_number, "has invalid number of columns in file", file_name
+                print "Row number", row_number, "has invalid column(s) in file", file_name
                 print err
                 sys.exit(0)
             return dict_hotel_deals
@@ -207,38 +207,55 @@ def populate_hotel_deals_from_file(file_name, dict_hotel_deals):
 
 
 
+def calculate_final_cost(hotel_deal, reservation):
+    total_cost = (float(reservation.get_num_stay_days()) * float(hotel_deal.get_nightly_rate()))
+    if hotel_deal.get_deal_type() == Constants.PCT:
+        discount = float(hotel_deal.get_deal_value())/100.00 * float(total_cost)
+    else:
+        discount = float(hotel_deal.get_deal_value())
+    #Deal Value is always negative, so we add
+    final_cost = float(total_cost) + float(discount)
+    return final_cost
 
-def populate_list_promo_text(list_hotel_deals, list_promo_text, reservation):
-    for number, hotel_deal in enumerate(list_hotel_deals):
-        if reservation.get_checkin_date() >=hotel_deal.get_start_date():
+
+def get_best_promo_text( list_hotel_deals, reservation):
+    best_cost = float("inf")
+    promo_text = 'no deals found'
+    for hotel_deal in list_hotel_deals:
+        current_cost = float("inf")
+        if reservation.get_checkin_date() >= hotel_deal.get_start_date():
             if reservation.get_checkin_date() <hotel_deal.get_end_date():
                 if hotel_deal.get_deal_type() == Constants.REBATE_3PLUS:
                     #This rebate is only applicable if stay is for more than three days
                     if reservation.get_num_stay_days() >= 3:
-                        list_promo_text.append(hotel_deal.get_promo_txt())
+                        current_cost = calculate_final_cost(hotel_deal, reservation)
                 else:
-                    list_promo_text.append(hotel_deal.get_promo_txt())
+                    current_cost = calculate_final_cost(hotel_deal, reservation)
+
+        if current_cost < best_cost:
+            best_cost = current_cost
+            promo_text = hotel_deal.get_promo_txt()
+
+    return promo_text
 
 
-def print_list_of_promos(dict_hotel_deals, reservation):
+def print_best_deal(dict_hotel_deals, reservation):
     reservation_hotel_name = reservation.get_hotel_name()
-    list_promo_text = []
+    promo_text = 'no deals found'
     if reservation_hotel_name in dict_hotel_deals:
         list_hotel_deals = dict_hotel_deals[reservation_hotel_name]
         if list_hotel_deals:
-            populate_list_promo_text(list_hotel_deals, list_promo_text, reservation)
+            promo_text = get_best_promo_text(list_hotel_deals, reservation)
 
-    if not list_promo_text:
-        print "no deal available"
-    else:
-        for promo_text in list_promo_text:
-            print promo_text
+    print promo_text
+
 
 def main():
     file_name, reservation = process_command_line_args(sys.argv)
     dict_hotel_deals = defaultdict(list)
     populate_hotel_deals_from_file(file_name, dict_hotel_deals)
-    print_list_of_promos(dict_hotel_deals, reservation)
+    print_best_deal(dict_hotel_deals, reservation)
+
 
 if __name__ == "__main__":
     main()

@@ -3,22 +3,23 @@ echo "python HotelDeals.py ./test_case_files/deals.csv "Hotel CommonWealth" 2014
 python HotelDeals.py ./test_case_files/deals.csv "Hotel CommonWealth" 2014-06-02 3
 
 echo "---------------Correct test case: Skip rebate_3plus deals in date range but stay <3------------------"
-echo "python HotelDeals.py ./test_case_files/deals.csv "Hotel CommonWealth" 2014-06-30 2"
-python HotelDeals.py ./test_case_files/deals.csv "Hotel CommonWealth" 2014-06-30 2
+echo "python HotelDeals.py ./test_case_files/deals_skip_rebate_plus3.csv "Hotel CommonWealth" 2014-06-30 2"
+python HotelDeals.py ./test_case_files/deals_skip_rebate_plus3.csv "Hotel CommonWealth" 2014-06-30 2
 
 echo "------------- Correct test case: Skip deals with end_date <= checkin date -----------------"
 echo "python HotelDeals.py ./test_case_files/deals.csv "Hotel CommonWealth" 2015-06-30 2"
 python HotelDeals.py ./test_case_files/deals.csv "Hotel CommonWealth" 2015-06-30 2
 
 echo "------------- Boundary case: Skip deals with end_date == checkin date -----------------"
-echo "python HotelDeals.py ./test_case_files/deals.csv "Hotel CommonWealth" 2014-06-15 4"
-python HotelDeals.py ./test_case_files/deals.csv "Hotel CommonWealth" 2014-06-15 4
+echo "python HotelDeals.py ./test_case_files/deals_boundary_checkin_equals_end.csv "Hotel CommonWealth" 2014-06-15 4"
+python HotelDeals.py ./test_case_files/deals_boundary_checkin_equals_end.csv "Hotel CommonWealth" 2014-06-15 4
+
 
 echo "------------- Boundary case: Include deals with start_date == checkin date -----------------"
-echo "python HotelDeals.py ./test_case_files/deals.csv "Hotel CommonWealth" 2014-07-07 4"
-python HotelDeals.py ./test_case_files/deals.csv "Hotel CommonWealth" 2014-07-07 4
+echo "python HotelDeals.py ./test_case_files/deals_boundary_start_equals_checkin.csv "Hotel CommonWealth" 2014-07-07 4"
+python HotelDeals.py ./test_case_files/deals_boundary_start_equals_checkin.csv "Hotel CommonWealth" 2014-07-07 4
 
-
+echo "################### Bad Input data ###########################"
 echo "--------------File Not found ----------------------"
 echo "python HotelDeals.py ./test_case_files/not_found.csv "Hotel CommonWealth" 2014-06-30 3"
 python HotelDeals.py ./test_case_files/not_found.csv "Hotel CommonWealth" 2014-06-30 3

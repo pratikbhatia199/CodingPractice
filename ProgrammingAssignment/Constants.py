@@ -1,3 +1,6 @@
 __author__ = 'pratik'
-set_possible_deal_types = set(['rebate_3plus', 'pct', 'rebate'])
+
 REBATE_3PLUS = 'rebate_3plus'
+PCT = 'pct'
+REBATE = 'rebate'
+set_possible_deal_types = set([REBATE_3PLUS, PCT, REBATE])
