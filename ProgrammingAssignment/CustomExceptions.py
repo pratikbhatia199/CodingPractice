@@ -33,7 +33,7 @@ class InvalidSequence(Exception):
     def __init__(self, row_number, start_date, end_date):
         self.msg = "Start date "+start_date+\
                    " cannot be greater than end date "+end_date+\
-                   " found at row "+row_number
+                   " found at row "+str(row_number)
 
     def __str__(self):
         return repr(self.msg)

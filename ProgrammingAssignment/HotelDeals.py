@@ -112,6 +112,13 @@ def process_command_line_args(args):
                   "Example: > python HotelDeals.py ./deals.txt \"Hotel CommonWealth\" 2014-06-30 3"
         sys.exit(0)
 
+    try:
+        int(num_stay_days)
+    except ValueError as err:
+        print 'The stay days should be a number greater than 0'
+        print err
+        sys.exit(0)
+
 
     check_reservation_parameters(hotel_name, checkin_date, num_stay_days)
     reservation = Reservation(hotel_name, checkin_date, num_stay_days)
@@ -156,12 +163,14 @@ def check_values_of_files(row_number, hotel_name, nightly_rate, promo_txt, deal_
     except ValueError as err:
         print "Start date invalid, row number: ", row_number
         print err
+        sys.exit(0)
 
     try:
         datecheck.strptime(end_date, "%Y-%m-%d")
     except ValueError as err:
         print "End date invalid, row number: ", row_number
         print err
+        sys.exit(0)
 
     #Start date cannot be after than the end date value
     if dparser.parse(start_date) > dparser.parse(end_date):
@@ -186,7 +195,7 @@ def populate_hotel_deals_from_file(file_name, dict_hotel_deals):
                     hotel_deal = HotelDeals(hotel_name, nightly_rate, promo_txt, deal_value, deal_type, start_date, end_date)
                     dict_hotel_deals[hotel_name].append(hotel_deal)
             except ValueError as err:
-                print "Row number", row_number, "has a missing column in file", file_name
+                print "Row number", row_number, "has invalid number of columns in file", file_name
                 print err
                 sys.exit(0)
             return dict_hotel_deals
@@ -201,13 +210,14 @@ def populate_hotel_deals_from_file(file_name, dict_hotel_deals):
 
 def populate_list_promo_text(list_hotel_deals, list_promo_text, reservation):
     for number, hotel_deal in enumerate(list_hotel_deals):
-        if reservation.get_checkin_date() >= hotel_deal.get_start_date():
-            if hotel_deal.get_deal_type() == 'rebate_3plus':
-                #This rebate is only applicable if stay is for more than three days
-                if reservation.get_num_stay_days() >= 3:
+        if reservation.get_checkin_date() >=hotel_deal.get_start_date():
+            if reservation.get_checkin_date() <hotel_deal.get_end_date():
+                if hotel_deal.get_deal_type() == Constants.REBATE_3PLUS:
+                    #This rebate is only applicable if stay is for more than three days
+                    if reservation.get_num_stay_days() >= 3:
+                        list_promo_text.append(hotel_deal.get_promo_txt())
+                else:
                     list_promo_text.append(hotel_deal.get_promo_txt())
-            else:
-                list_promo_text.append(hotel_deal.get_promo_txt())
 
 
 def print_list_of_promos(dict_hotel_deals, reservation):
