@@ -4,6 +4,9 @@ import csv
 from collections import defaultdict
 import dateutil.parser as dparser
 from datetime import datetime as datecheck
+from CustomExceptions import DealValue, DealType, BlankValues, InvalidSequence, InvalidCommandLine, NegativeStay
+import Globals
+
 
 class HotelDeals:
     """
@@ -78,7 +81,18 @@ class Reservation:
     def get_all_attributes(self):
         return self.get_hotel_name(), self.get_checkin_date(), self.get_num_stay_days()
 
+def check_reservation_parameters(hotel_name, checkin_date, num_stay_days):
+    try:
+        datecheck.strptime(checkin_date, "%Y-%m-%d")
+    except ValueError as err:
+        print "Check-in date invalid."
+        print err
 
+    if not hotel_name.strip():
+        raise BlankValues(0, "Hotel Name")
+
+    if num_stay_days < 1:
+        raise NegativeStay(num_stay_days)
 
 def process_command_line_args(args):
     """
@@ -88,32 +102,65 @@ def process_command_line_args(args):
     if len(args) == 5:
         program_name, file_name, hotel_name, checkin_date, num_stay_days = args
     else:
-        print "Specify the file name, hotel name, checkin date and number of days of stay separated by spaces. \n" \
-              "Correct format: python HotelDeals.py <file_name> \"<hotel_name>\" <checkin date> <number of days>\n" \
-              "Example: > python HotelDeals.py ./deals.txt \"Hotel Commonwealth\" 2014-06-30 3"
+        try:
+            raise InvalidCommandLine()
+        except InvalidCommandLine:
+            print "Specify the file name, hotel name, checkin date and number of days of stay separated by spaces. \n" +\
+                  "Correct format: python HotelDeals.py <file_name> \"<hotel_name>\" <checkin date> <number of days>\n" +\
+                  "Example: > python HotelDeals.py ./deals.txt \"Hotel CommonWealth\" 2014-06-30 3"
         sys.exit(0)
 
+
+    check_reservation_parameters(hotel_name, checkin_date, num_stay_days)
     reservation = Reservation(hotel_name, checkin_date, num_stay_days)
     return file_name, reservation
 
+def check_blank_values(row_number, hotel_name, nightly_rate, promo_txt, deal_value, deal_type, start_date, end_date):
+    if not hotel_name:
+        raise BlankValues(row_number, "Hotel Name")
+
+    if not nightly_rate:
+        raise BlankValues(row_number, "Nightly Rate")
+
+    if not promo_txt:
+        raise BlankValues(row_number, "Promotion Text")
+
+    if not deal_value:
+        raise BlankValues(row_number, "Deal Value")
+
+    if not deal_type:
+        raise BlankValues(row_number, "Deal Type")
+
+
+    if not start_date:
+        raise BlankValues(row_number, "Start Date")
+
+    if not end_date:
+        raise BlankValues(row_number, "End Date")
+
 def check_values_of_files(row_number, hotel_name, nightly_rate, promo_txt, deal_value, deal_type, start_date, end_date):
+
+    check_blank_values(row_number, hotel_name, nightly_rate, promo_txt, deal_value, deal_type, start_date, end_date)
+
     if int(deal_value) >= 0:
-        print "Deal Value should be negative, row ", row_number
-        sys.exit(0)
+        raise DealValue(row_number, deal_value)
 
-    set_possible_deal_types = set(['rebate_3plus', 'pct', 'rebate'])
-
-    if deal_type not in set_possible_deal_types:
-        print "Deal type can only be of following types: ", ', '.join(set_possible_deal_types)
-        print "Row number", row_number
-        sys.exit(0)
+    if deal_type not in Globals.set_possible_deal_types:
+        raise DealType(row_number, deal_type)
     try:
         datecheck.strptime(start_date, "%Y-%m-%d")
-
     except ValueError as err:
         print "Start date invalid, row number: ", row_number
         print err
-        sys.exit(0)
+
+    try:
+        datecheck.strptime(end_date, "%Y-%m-%d")
+    except ValueError as err:
+        print "End date invalid, row number: ", row_number
+        print err
+
+    if dparser.parse(start_date) > dparser.parse(end_date):
+        raise InvalidSequence(row_number, start_date, end_date)
 
 
 def populate_hotel_deals_from_file(file_name, dict_hotel_deals):
@@ -127,13 +174,18 @@ def populate_hotel_deals_from_file(file_name, dict_hotel_deals):
         with open(file_name, 'rb') as deals_file:
             dealreader = csv.reader(deals_file, delimiter=',', quotechar='|')
             row_number = 1
-            for hotel_name, nightly_rate, promo_txt, deal_value, deal_type, start_date, end_date in dealreader:
-                check_values_of_files(row_number, hotel_name, nightly_rate, promo_txt, deal_value, deal_type, start_date, end_date)
-                row_number += 1
-
-                hotel_deal = HotelDeals(hotel_name, nightly_rate, promo_txt, deal_value, deal_type, start_date, end_date)
-                dict_hotel_deals[hotel_name].append(hotel_deal)
+            try:
+                for hotel_name, nightly_rate, promo_txt, deal_value, deal_type, start_date, end_date in dealreader:
+                    check_values_of_files(row_number, hotel_name, nightly_rate, promo_txt, deal_value, deal_type, start_date, end_date)
+                    row_number += 1
+                    hotel_deal = HotelDeals(hotel_name, nightly_rate, promo_txt, deal_value, deal_type, start_date, end_date)
+                    dict_hotel_deals[hotel_name].append(hotel_deal)
+            except ValueError as err:
+                print "Row number", row_number, "has a missing column in file", file_name
+                print err
+                sys.exit(0)
             return dict_hotel_deals
+
     except IOError as e:
         print "Check the file path or file exists."
         print "I/O error({0}): {1}".format(e.errno, e.strerror)
@@ -154,17 +206,17 @@ def populate_list_promo_text(list_hotel_deals, list_promo_text, reservation):
 
 def print_list_of_promos(dict_hotel_deals, reservation):
     reservation_hotel_name = reservation.get_hotel_name()
+    list_promo_text = []
     if reservation_hotel_name in dict_hotel_deals:
         list_hotel_deals = dict_hotel_deals[reservation_hotel_name]
-        list_promo_text = []
         if list_hotel_deals:
             populate_list_promo_text(list_hotel_deals, list_promo_text, reservation)
 
-        if not list_promo_text:
-            print "--no deals found--"
-        else:
-            for promo_text in list_promo_text:
-                print promo_text
+    if not list_promo_text:
+        print "no deal available"
+    else:
+        for promo_text in list_promo_text:
+            print promo_text
 
 def main():
     file_name, reservation = process_command_line_args(sys.argv)
@@ -172,4 +224,5 @@ def main():
     populate_hotel_deals_from_file(file_name, dict_hotel_deals)
     print_list_of_promos(dict_hotel_deals, reservation)
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()
