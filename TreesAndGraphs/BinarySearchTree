@@ -1,5 +1,6 @@
 __author__ = 'pratik'
 
+from collections import deque, defaultdict
 class Node:
 
     left = None
@@ -137,6 +138,48 @@ class BinarySearchTree:
 
         list_path.remove(root.data)
 
+    def least_common_ancestor(self, var_1, var_2, root):
+        if not root:
+            return None
+
+        if root.data == var_1:
+            return root.data
+
+        if root.data == var_2:
+            return root.data
+
+        left_tree = self.least_common_ancestor(var_1, var_2, root.left)
+
+        right_tree = self.least_common_ancestor(var_1, var_2, root.right)
+
+        if left_tree and not right_tree:
+            return left_tree
+
+        if right_tree and not left_tree:
+            return right_tree
+
+        if left_tree and right_tree:
+            return root.data
+
+        return None
+
+    def bst_bfs(self, queue, dict_level):
+        root, level, prev = queue.popleft()
+        print root.data, "visited", level, prev
+
+        dict_level[level].append(root.data)
+
+        if root.left:
+            queue.append((root.left, level+1, level))
+        if root.right:
+            queue.append((root.right, level+1, level))
+
+
+
+
+
+
+
 
 
 
@@ -161,6 +204,13 @@ def main():
     bst.print_root_to_leaf(list_path, bst.root)
     for path in list_of_paths:
         print path
+    common_ancestor = bst.least_common_ancestor(1, 7, bst.root)
+    print common_ancestor
+    queue = deque()
+    dict_level = defaultdict(list)
+    queue.append((bst.root, 0, 0))
+    while(queue):
+        bst.bst_bfs(queue, dict_level)
 
 
 main()
