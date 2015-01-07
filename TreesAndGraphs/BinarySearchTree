@@ -121,8 +121,29 @@ class BinarySearchTree:
             self.postorder(root.right)
             print root.data
 
+    def print_root_to_leaf(self, list_path, root):
+        list_path.append(root.data)
+        if root.left == None and root.right == None:
+            print "Path found: ", list_path
+            list_path.remove(root.data)
+            return
+
+        if root.left != None:
+            self.print_root_to_leaf(list_path, root.left)
+
+
+        if root.right != None:
+            self.print_root_to_leaf(list_path, root.right)
+
+        list_path.remove(root.data)
+
+
+
+
+
+
 def main():
-    inserts = [5,2,8,3,1,7,9]
+    inserts = [6, 2, 8, 1, 4, 7, 3, 5]
     bst = BinarySearchTree()
     for value in inserts:
         node = Node(value)
@@ -135,6 +156,11 @@ def main():
     print "postorder recursive"
     bst.postorder(bst.root)
     bst.postorder_non_recursive(bst.root)
+    list_path = []
+    list_of_paths = []
+    bst.print_root_to_leaf(list_path, bst.root)
+    for path in list_of_paths:
+        print path
 
 
 main()
