@@ -166,7 +166,10 @@ class BinarySearchTree:
     def bst_bfs(self, queue, dict_level):
         root, level, prev = queue.popleft()
         print root.data, "visited", level, prev
-
+        if level not in dict_level:
+            print "first: ", root.data
+            if dict_level:
+                print dict_level[prev][-1], "last"
         dict_level[level].append(root.data)
 
         if root.left:
